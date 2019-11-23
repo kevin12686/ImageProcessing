@@ -1,6 +1,7 @@
 #pragma once
 #include <stack>
 #include <regex>
+#include <cmath>
 #include <msclr/marshal_cppstd.h>
 #include "InputForm.h"
 
@@ -575,7 +576,6 @@ namespace ImageProcessing {
 		}
 
 		arrayRGB hg;
-		int haha = count_max;
 		hg.Height = max_width;
 		hg.Width = 256;
 		hg.arr = new unsigned char**[hg.Height];
@@ -592,6 +592,52 @@ namespace ImageProcessing {
 				hg.arr[j][i][0] = 0;
 				hg.arr[j][i][1] = 0;
 				hg.arr[j][i][2] = 0;
+			}
+		}
+		return hg;
+	}
+
+	private: arrayRGB histogramEQ(arrayRGB img) {
+		arrayRGB hg;
+		hg.Height = img.Height;
+		hg.Width = img.Width;
+		hg.arr = new unsigned char**[hg.Height];
+		for (int i = 0; i < hg.Height; i++) {
+			hg.arr[i] = new unsigned char*[hg.Width];
+			for (int j = 0; j < hg.Width; j++) {
+				hg.arr[i][j] = new unsigned char[3];
+			}
+		}
+		int total_pixel = img.Height * img.Width;
+
+		for (int h = 0; h < 3; h++) {
+			int* lev_count = new int[256];
+			for (int i = 0; i < 256; i++) {
+				lev_count[i] = 0;
+			}
+			for (int i = 0; i < img.Height; i++) {
+				for (int j = 0; j < img.Width; j++) {
+					lev_count[img.arr[i][j][h]]++;
+				}
+			}
+			for (int i = 255; i > -1; i--) {
+				int sum = lev_count[i];
+				for (int j = 0; j < i; j++) {
+					sum += lev_count[j];
+				}
+				lev_count[i] = sum;
+			}
+			int cdf_min = lev_count[0];
+
+			int* map_lev = new int[256];
+			for (int i = 0; i < 256; i++) {
+				map_lev[i] = int(round((lev_count[i] - cdf_min) * 255 / (total_pixel - cdf_min)));
+			}
+
+			for (int i = 0; i < hg.Height; i++) {
+				for (int j = 0; j < hg.Width; j++) {
+					hg.arr[i][j][h] = map_lev[img.arr[i][j][h]];
+				}
 			}
 		}
 		return hg;
@@ -1046,17 +1092,14 @@ namespace ImageProcessing {
 			label1->Text = "Original (0)";
 			Bitmap^ ori = gcnew Bitmap(pictureBox_s->Image);
 			arrayRGB ori_arr = map2arr(ori);
+			arrayRGB eq = histogramEQ(ori_arr);
 
-			// 直方圖均化
-
-			pictureBox_1->Image = nullptr;
+			pictureBox_1->Image = arr2map(eq);
 			label_1->Text = "EQ";
 			pictureBox_2->Image = arr2map(histogram(ori_arr));
 			label_2->Text = "Histogram (ORI)";
 
-			// 直方圖均化的直方圖
-
-			pictureBox_3->Image = nullptr;
+			pictureBox_3->Image = arr2map(histogram(eq));
 			label_3->Text = "Histogram (EQ)";
 			save_status();
 		}
