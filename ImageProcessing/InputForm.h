@@ -121,5 +121,9 @@ namespace ImageProcessing {
 	public: String^ getTH() {
 		return textBox1->Text;
 	}
+
+	public: void setLabelText(String^ s) {
+		label1->Text = s;
+	}
 	};
 }

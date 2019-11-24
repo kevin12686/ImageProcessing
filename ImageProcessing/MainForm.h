@@ -328,6 +328,7 @@ namespace ImageProcessing {
 			this->button19->TabIndex = 0;
 			this->button19->Text = L"Image rotation (7)";
 			this->button19->UseVisualStyleBackColor = true;
+			this->button19->Click += gcnew System::EventHandler(this, &MainForm::button19_Click);
 			// 
 			// button12
 			// 
@@ -643,6 +644,47 @@ namespace ImageProcessing {
 		return hg;
 	}
 
+	private: arrayRGB rotation(arrayRGB img, int angle) {
+		angle %= 360;
+		double rads = angle * 3.14 / 180;
+		double cosT = cos(-rads);
+		double sinT = sin(-rads);
+		int center_x = img.Width / 2;
+		int center_y = img.Height / 2;
+
+
+		int e_x = angle % 90 == 0 ? 0 : abs(center_x + cosT * (0 - center_x) + sinT * (0 - center_y));
+		int e_y = angle % 90 == 0 ? 0 : abs(center_y + cosT * (0 - center_y) - sinT * (0 - center_x));
+
+		arrayRGB hg;
+		hg.Height = img.Height + 2 * e_y;
+		hg.Width = img.Width + +2 * e_x;
+		hg.arr = new unsigned char**[hg.Height];
+		for (int i = 0; i < hg.Height; i++) {
+			hg.arr[i] = new unsigned char*[hg.Width];
+			for (int j = 0; j < hg.Width; j++) {
+				hg.arr[i][j] = new unsigned char[3]{ 0, 0, 0 };
+			}
+		}
+
+		int new_center_x = hg.Width / 2;
+		int new_center_y = hg.Height / 2;
+
+		for (int i = 0; i < img.Height; i++) {
+			for (int j = 0; j < img.Width; j++) {
+				int new_x = new_center_x + cosT * (j - center_x) + sinT * (i - center_y);
+				int new_y = new_center_y + cosT * (i - center_y) - sinT * (j - center_x);
+				if (new_x > -1 && new_y > -1 && new_x < hg.Width && new_y < hg.Height) {
+					for (int k = 0; k < 3; k++) {
+						hg.arr[new_y][new_x][k] = img.arr[i][j][k];
+					}
+				}
+
+			}
+		}
+		return hg;
+	}
+
 	private: System::Void pictureBox_s_Click(System::Object^  sender, System::EventArgs^  e) {
 		source = 0;
 		label1->Text = "Original (0)";
@@ -916,6 +958,7 @@ namespace ImageProcessing {
 	private: System::Void button17_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (get_source()->Image) {
 			InputForm^ form = gcnew InputForm();
+			form->setLabelText("Threshold");
 			form->ShowDialog();
 			string s = tostr(form->getTH());
 			int n = -1;
@@ -953,6 +996,7 @@ namespace ImageProcessing {
 	private: System::Void button4_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (get_source()->Image) {
 			InputForm^ form = gcnew InputForm();
+			form->setLabelText("Threshold");
 			form->ShowDialog();
 			string s = tostr(form->getTH());
 			int n = -1;
@@ -1006,6 +1050,7 @@ namespace ImageProcessing {
 	private: System::Void button12_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (get_source()->Image) {
 			InputForm^ form = gcnew InputForm();
+			form->setLabelText("Threshold");
 			form->ShowDialog();
 			string s = tostr(form->getTH());
 			int n = -1;
@@ -1102,6 +1147,39 @@ namespace ImageProcessing {
 			pictureBox_3->Image = arr2map(histogram(eq));
 			label_3->Text = "Histogram (EQ)";
 			save_status();
+		}
+	}
+
+	private: System::Void button19_Click(System::Object^  sender, System::EventArgs^  e) {
+		if (get_source()->Image) {
+			InputForm^ form = gcnew InputForm();
+			form->setLabelText("Angle");
+			form->ShowDialog();
+			string s = tostr(form->getTH());
+			int n = -1;
+			if (isNumber(s)) {
+				n = stoi(s) % 360;
+
+				pictureBox_s->Image = gcnew Bitmap(get_source()->Image);
+				source = 0;
+				label1->Text = "Original (0)";
+				Bitmap^ ori = gcnew Bitmap(pictureBox_s->Image);
+				arrayRGB ori_arr = map2arr(ori);
+
+				arrayRGB ro = rotation(ori_arr, n);
+
+				pictureBox_1->Image = arr2map(ro);
+				label_1->Text = "Rotated";
+				pictureBox_2->Image = nullptr;
+				label_2->Text = "Null";
+
+				pictureBox_3->Image = nullptr;
+				label_3->Text = "Null";
+				save_status();
+			}
+			else {
+				MessageBox::Show("Input must be a number.");
+			}
 		}
 	}
 
