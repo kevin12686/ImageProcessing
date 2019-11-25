@@ -98,11 +98,15 @@ namespace ImageProcessing {
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 15);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(456, 99);
+			this->ControlBox = false;
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->textBox1);
 			this->Controls->Add(this->label1);
+			this->MaximumSize = System::Drawing::Size(470, 150);
+			this->MinimumSize = System::Drawing::Size(470, 150);
 			this->Name = L"InputForm";
 			this->Text = L"InputForm";
+			this->TopMost = true;
 			this->ResumeLayout(false);
 			this->PerformLayout();
 

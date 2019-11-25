@@ -4,6 +4,7 @@
 #include <cmath>
 #include <msclr/marshal_cppstd.h>
 #include "InputForm.h"
+#include "StrechForm.h"
 
 void swap(int *a, int *b) {
 	int temp = *a;
@@ -319,6 +320,7 @@ namespace ImageProcessing {
 			this->button6->TabIndex = 0;
 			this->button6->Text = L"Image stretching (7)";
 			this->button6->UseVisualStyleBackColor = true;
+			this->button6->Click += gcnew System::EventHandler(this, &MainForm::button6_Click);
 			// 
 			// button19
 			// 
@@ -698,9 +700,44 @@ namespace ImageProcessing {
 
 		for (int i = 0; i < newHeight; i++) {
 			for (int j = 0; j < newWidth; j++) {
-				// 新圖尋找舊點 做雙線性差補
+
 				int refX = int(round(cosT * (j - newCenterX) + sinT * (i - newCenterY))) + oldCenterX;
 				int refY = int(round(-sinT * (j - newCenterX) + cosT * (i - newCenterY))) + oldCenterY;
+				if (refX >= 0 && refX < img.Width && refY >= 0 && refY < img.Height) {
+					newImg.arr[i][j] = img.arr[refY][refX];
+				}
+			}
+		}
+
+		return newImg;
+	}
+
+	private: arrayRGB stretch(arrayRGB img, int width, int height) {
+		int oldWidth = img.Width;
+		int oldHeight = img.Height;
+		
+		int newWidth = width;
+		int newHeight = height;
+
+		double scale_w = double(oldWidth) / newWidth;
+		double scale_h = double(oldHeight) / newHeight;
+
+		arrayRGB newImg;
+		newImg.Height = newHeight;
+		newImg.Width = newWidth;
+		newImg.arr = new unsigned char**[newImg.Height];
+		for (int i = 0; i < newImg.Height; i++) {
+			newImg.arr[i] = new unsigned char*[newImg.Width];
+			for (int j = 0; j < newImg.Width; j++) {
+				newImg.arr[i][j] = new unsigned char[3]{ 0, 0, 0 };
+			}
+		}
+
+		for (int i = 0; i < newHeight; i++) {
+			for (int j = 0; j < newWidth; j++) {
+
+				int refX = int(round(j * scale_w));
+				int refY = int(round(i * scale_h));
 				if (refX >= 0 && refX < img.Width && refY >= 0 && refY < img.Height) {
 					newImg.arr[i][j] = img.arr[refY][refX];
 				}
@@ -873,6 +910,9 @@ namespace ImageProcessing {
 			label_2->Text = gcnew String(temp->second_label.c_str());
 			label_3->Text = gcnew String(temp->third_label.c_str());
 			delete temp;
+		}
+		else {
+			MessageBox::Show("You should do something.");
 		}
 	}
 	private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -1195,6 +1235,39 @@ namespace ImageProcessing {
 
 				pictureBox_1->Image = arr2map(ro);
 				label_1->Text = "Rotated";
+				pictureBox_2->Image = nullptr;
+				label_2->Text = "Null";
+
+				pictureBox_3->Image = nullptr;
+				label_3->Text = "Null";
+				save_status();
+			}
+			else {
+				MessageBox::Show("Input must be a number.");
+			}
+		}
+	}
+
+	private: System::Void button6_Click(System::Object^  sender, System::EventArgs^  e) {
+		if (get_source()->Image) {
+			StrechForm^ form = gcnew StrechForm();
+			form->setWH("320", "240");
+			form->ShowDialog();
+			string ws = tostr(form->getWidth());
+			string hs = tostr(form->getHeight());
+			if (isNumber(ws) && isNumber(hs) && stoi(ws) > 0 && stoi(hs) > 0) {
+				int new_Width = stoi(ws);
+				int new_Height = stoi(hs);
+				pictureBox_s->Image = gcnew Bitmap(get_source()->Image);
+				source = 0;
+				label1->Text = "Original (0)";
+				Bitmap^ ori = gcnew Bitmap(pictureBox_s->Image);
+				arrayRGB ori_arr = map2arr(ori);
+
+				arrayRGB ro = stretch(ori_arr, new_Width, new_Height);
+
+				pictureBox_1->Image = arr2map(ro);
+				label_1->Text = "Stretch";
 				pictureBox_2->Image = nullptr;
 				label_2->Text = "Null";
 

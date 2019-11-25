@@ -21,12 +21,18 @@
     <ClCompile Include="InputForm.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
+    <ClCompile Include="StrechForm.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainForm.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="InputForm.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="StrechForm.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
