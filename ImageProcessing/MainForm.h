@@ -135,6 +135,7 @@ namespace ImageProcessing {
 
 	private: System::Windows::Forms::Button^  button16;
 	private: System::Windows::Forms::Button^  button_open;
+	private: System::Windows::Forms::Button^  button_save;
 
 
 	private: System::Windows::Forms::Button^  button1;
@@ -159,6 +160,7 @@ namespace ImageProcessing {
 
 
 	private: System::Windows::Forms::OpenFileDialog^  openFileDialog_read;
+	private: System::Windows::Forms::SaveFileDialog^  saveFileDialog_save;
 	private: System::Windows::Forms::Button^  button15;
 
 	private: System::Windows::Forms::Button^  button11;
@@ -204,12 +206,14 @@ namespace ImageProcessing {
 			this->button7 = (gcnew System::Windows::Forms::Button());
 			this->button16 = (gcnew System::Windows::Forms::Button());
 			this->button_open = (gcnew System::Windows::Forms::Button());
+			this->button_save = (gcnew System::Windows::Forms::Button());
 			this->pictureBox_1 = (gcnew System::Windows::Forms::PictureBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->label_1 = (gcnew System::Windows::Forms::Label());
 			this->button_undo = (gcnew System::Windows::Forms::Button());
 			this->label_3 = (gcnew System::Windows::Forms::Label());
 			this->openFileDialog_read = (gcnew System::Windows::Forms::OpenFileDialog());
+			this->saveFileDialog_save = (gcnew System::Windows::Forms::SaveFileDialog());
 			this->pictureBox_2 = (gcnew System::Windows::Forms::PictureBox());
 			this->pictureBox_3 = (gcnew System::Windows::Forms::PictureBox());
 			this->label_2 = (gcnew System::Windows::Forms::Label());
@@ -383,6 +387,18 @@ namespace ImageProcessing {
 			this->button_open->UseVisualStyleBackColor = true;
 			this->button_open->Click += gcnew System::EventHandler(this, &MainForm::button_open_Click);
 			// 
+			// button_save
+			// 
+			this->button_save->Font = (gcnew System::Drawing::Font(L"微軟正黑體", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(136)));
+			this->button_save->Location = System::Drawing::Point(158, 810);
+			this->button_save->Name = L"button_save";
+			this->button_save->Size = System::Drawing::Size(127, 39);
+			this->button_save->TabIndex = 0;
+			this->button_save->Text = L"Save";
+			this->button_save->UseVisualStyleBackColor = true;
+			this->button_save->Click += gcnew System::EventHandler(this, &MainForm::button_save_Click);
+			// 
 			// pictureBox_1
 			// 
 			this->pictureBox_1->Location = System::Drawing::Point(367, 15);
@@ -446,6 +462,14 @@ namespace ImageProcessing {
 			this->openFileDialog_read->Filter = L"點陣圖 (*.bmp) | *.bmp";
 			this->openFileDialog_read->Title = L"讀取影像";
 			// 
+			// saveFileDialog_read
+			// 
+			this->saveFileDialog_save->Filter = L"點陣圖 (*.bmp) | *.bmp";
+			this->saveFileDialog_save->SupportMultiDottedExtensions = true;
+			this->saveFileDialog_save->DefaultExt = L"txt";
+			this->saveFileDialog_save->FileName = L"output";
+			this->saveFileDialog_save->Title = L"儲存影像";
+			// 
 			// pictureBox_2
 			// 
 			this->pictureBox_2->Location = System::Drawing::Point(18, 288);
@@ -495,6 +519,7 @@ namespace ImageProcessing {
 			this->Controls->Add(this->pictureBox_s);
 			this->Controls->Add(this->button_undo);
 			this->Controls->Add(this->button_open);
+			this->Controls->Add(this->button_save);
 			this->MaximumSize = System::Drawing::Size(727, 909);
 			this->MinimumSize = System::Drawing::Size(727, 909);
 			this->Name = L"MainForm";
@@ -715,7 +740,7 @@ namespace ImageProcessing {
 	private: arrayRGB stretch(arrayRGB img, int width, int height) {
 		int oldWidth = img.Width;
 		int oldHeight = img.Height;
-		
+
 		int newWidth = width;
 		int newHeight = height;
 
@@ -876,6 +901,29 @@ namespace ImageProcessing {
 			source = 0;
 			while (!history.empty())
 				history.pop();
+		}
+	}
+
+	private: System::Void button_save_Click(System::Object^  sender, System::EventArgs^  e) {
+		if (pictureBox_s->Image || pictureBox_1->Image || pictureBox_2->Image || pictureBox_3->Image) {
+			if (saveFileDialog_save->ShowDialog() == System::Windows::Forms::DialogResult::OK && saveFileDialog_save->FileName->Length > 0) {
+				String^ sfd = saveFileDialog_save->FileName;
+				if (pictureBox_s->Image) {
+					pictureBox_s->Image->Save(sfd->Split('.')[0] + "0." + sfd->Split('.')[1], System::Drawing::Imaging::ImageFormat::Bmp);
+				}
+				if (pictureBox_1->Image) {
+					pictureBox_1->Image->Save(sfd->Split('.')[0] + "1." + sfd->Split('.')[1], System::Drawing::Imaging::ImageFormat::Bmp);
+				}
+				if (pictureBox_2->Image) {
+					pictureBox_2->Image->Save(sfd->Split('.')[0] + "2." + sfd->Split('.')[1], System::Drawing::Imaging::ImageFormat::Bmp);
+				}
+				if (pictureBox_3->Image) {
+					pictureBox_3->Image->Save(sfd->Split('.')[0] + "3." + sfd->Split('.')[1], System::Drawing::Imaging::ImageFormat::Bmp);
+				}
+			}
+		}
+		else {
+			MessageBox::Show("These is no image.");
 		}
 	}
 	private: System::Void button_undo_Click(System::Object^  sender, System::EventArgs^  e) {
