@@ -50,15 +50,6 @@ unsigned char median(int size, int* arr) {
 	}
 }
 
-unsigned char sum(int size, int*arr) {
-	int sum = 0;
-	for (int i = 0; i < size; i++) {
-		sum += arr[i];
-	}
-	return sum > 255 ? 255 : sum;
-}
-
-
 int TH = 75;
 unsigned char threshold(int size, int*arr) {
 	int sum = 0;
@@ -849,12 +840,9 @@ namespace ImageProcessing {
 		else {
 			temp->third_pic = arrayRGB{ NULL, 0, 0 };
 		}
-		String^ l1 = gcnew String(this->label_1->Text);
-		String^ l2 = gcnew String(this->label_2->Text);
-		String^ l3 = gcnew String(this->label_3->Text);
-		temp->first_label = tostr(l1);
-		temp->second_label = tostr(l2);
-		temp->third_label = tostr(l3);
+		temp->first_label = tostr(this->label_1->Text);
+		temp->second_label = tostr(this->label_2->Text);
+		temp->third_label = tostr(this->label_3->Text);
 		history.push(temp);
 	}
 	public: arrayRGB map2arr(Bitmap^ bm) {
@@ -901,6 +889,7 @@ namespace ImageProcessing {
 			source = 0;
 			while (!history.empty())
 				history.pop();
+			save_status();
 		}
 	}
 
@@ -965,6 +954,7 @@ namespace ImageProcessing {
 	}
 	private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (get_source()->Image) {
+			save_status();
 			pictureBox_s->Image = gcnew Bitmap(get_source()->Image);
 			source = 0;
 			label1->Text = "Original (0)";
@@ -982,11 +972,11 @@ namespace ImageProcessing {
 			label_2->Text = "Null";
 			pictureBox_3->Image = nullptr;
 			label_3->Text = "Null";
-			save_status();
 		}
 	}
 	private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (get_source()->Image) {
+			save_status();
 			pictureBox_s->Image = gcnew Bitmap(get_source()->Image);
 			source = 0;
 			label1->Text = "Original (0)";
@@ -1017,12 +1007,12 @@ namespace ImageProcessing {
 			}
 			pictureBox_3->Image = b;
 			label_3->Text = "Blue";
-			save_status();
 		}
 	}
 
 	private: System::Void button11_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (get_source()->Image) {
+			save_status();
 			pictureBox_s->Image = gcnew Bitmap(get_source()->Image);
 			source = 0;
 			label1->Text = "Original (0)";
@@ -1041,11 +1031,11 @@ namespace ImageProcessing {
 			label_2->Text = "Null";
 			pictureBox_3->Image = nullptr;
 			label_3->Text = "Null";
-			save_status();
 		}
 	}
 	private: System::Void button5_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (get_source()->Image) {
+			save_status();
 			pictureBox_s->Image = gcnew Bitmap(get_source()->Image);
 			source = 0;
 			label1->Text = "Original (0)";
@@ -1064,7 +1054,6 @@ namespace ImageProcessing {
 			label_2->Text = "Null";
 			pictureBox_3->Image = nullptr;
 			label_3->Text = "Null";
-			save_status();
 		}
 	}
 
@@ -1079,6 +1068,7 @@ namespace ImageProcessing {
 				n = stoi(s);
 			}
 			if (n >= 0 && n <= 255) {
+				save_status();
 				pictureBox_s->Image = gcnew Bitmap(get_source()->Image);
 				Bitmap^ binPic = gcnew Bitmap(get_source()->Image);
 				source = 0;
@@ -1098,7 +1088,6 @@ namespace ImageProcessing {
 				label_2->Text = "Null";
 				pictureBox_3->Image = nullptr;
 				label_3->Text = "Null";
-				save_status();
 			}
 			else {
 				MessageBox::Show("Input must be number from range 0 to 255.");
@@ -1117,6 +1106,7 @@ namespace ImageProcessing {
 				n = stoi(s);
 			}
 			if (n >= 0 && n <= 255) {
+				save_status();
 				TH = n;
 				pictureBox_s->Image = gcnew Bitmap(get_source()->Image);
 				source = 0;
@@ -1152,7 +1142,7 @@ namespace ImageProcessing {
 
 				pictureBox_3->Image = arr2map(temp);
 				label_3->Text = "Combined";
-				save_status();
+
 			}
 			else {
 				MessageBox::Show("Input must be number from range 0 to 255.");
@@ -1171,6 +1161,7 @@ namespace ImageProcessing {
 				n = stoi(s);
 			}
 			if (n >= 0 && n <= 255) {
+				save_status();
 				TH = n;
 				pictureBox_s->Image = gcnew Bitmap(get_source()->Image);
 				source = 0;
@@ -1231,11 +1222,9 @@ namespace ImageProcessing {
 						}
 					}
 				}
-
-
 				pictureBox_3->Image = arr2map(temp);
 				label_3->Text = "Combined (OL)";
-				save_status();
+
 			}
 			else {
 				MessageBox::Show("Input must be number from range 0 to 255.");
@@ -1245,42 +1234,39 @@ namespace ImageProcessing {
 
 	private: System::Void button7_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (get_source()->Image) {
+			save_status();
 			pictureBox_s->Image = gcnew Bitmap(get_source()->Image);
 			source = 0;
 			label1->Text = "Original (0)";
 			Bitmap^ ori = gcnew Bitmap(pictureBox_s->Image);
 			arrayRGB ori_arr = map2arr(ori);
 			arrayRGB eq = histogramEQ(ori_arr);
-
 			pictureBox_1->Image = arr2map(eq);
 			label_1->Text = "EQ";
 			pictureBox_2->Image = arr2map(histogram(ori_arr));
 			label_2->Text = "Histogram (ORI)";
-
 			pictureBox_3->Image = arr2map(histogram(eq));
 			label_3->Text = "Histogram (EQ)";
-			save_status();
 		}
 	}
 
 	private: System::Void button19_Click(System::Object^  sender, System::EventArgs^  e) {
 		if (get_source()->Image) {
+
 			InputForm^ form = gcnew InputForm();
 			form->setLabelText("Angle");
 			form->ShowDialog();
 			string s = tostr(form->getTH());
 			int n = -1;
 			if (isNumber(s)) {
+				save_status();
 				n = stoi(s) % 360;
-
 				pictureBox_s->Image = gcnew Bitmap(get_source()->Image);
 				source = 0;
 				label1->Text = "Original (0)";
 				Bitmap^ ori = gcnew Bitmap(pictureBox_s->Image);
 				arrayRGB ori_arr = map2arr(ori);
-
 				arrayRGB ro = rotation(ori_arr, n);
-
 				pictureBox_1->Image = arr2map(ro);
 				label_1->Text = "Rotated";
 				pictureBox_2->Image = nullptr;
@@ -1288,7 +1274,6 @@ namespace ImageProcessing {
 
 				pictureBox_3->Image = nullptr;
 				label_3->Text = "Null";
-				save_status();
 			}
 			else {
 				MessageBox::Show("Input must be a number.");
@@ -1304,6 +1289,7 @@ namespace ImageProcessing {
 			string ws = tostr(form->getWidth());
 			string hs = tostr(form->getHeight());
 			if (isNumber(ws) && isNumber(hs) && stoi(ws) > 0 && stoi(hs) > 0) {
+				save_status();
 				int new_Width = stoi(ws);
 				int new_Height = stoi(hs);
 				pictureBox_s->Image = gcnew Bitmap(get_source()->Image);
@@ -1321,13 +1307,11 @@ namespace ImageProcessing {
 
 				pictureBox_3->Image = nullptr;
 				label_3->Text = "Null";
-				save_status();
 			}
 			else {
 				MessageBox::Show("Input must be a number.");
 			}
 		}
 	}
-
 	};
 }
