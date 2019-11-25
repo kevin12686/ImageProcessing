@@ -644,45 +644,70 @@ namespace ImageProcessing {
 		return hg;
 	}
 
-	private: arrayRGB rotation(arrayRGB img, int angle) {
-		angle %= 360;
-		double rads = angle * 3.14 / 180;
-		double cosT = cos(-rads);
-		double sinT = sin(-rads);
-		int center_x = img.Width / 2;
-		int center_y = img.Height / 2;
+	private: int* findboundary(arrayRGB img, int theta) {
+		double angle = 3.14159265358979323846 * theta / 180.0;
 
+		int** point = new int*[4];
+		point[0] = new int[2]{ 0, 0 };
+		point[1] = new int[2]{ img.Width - 1, 0 };
+		point[2] = new int[2]{ 0, img.Height - 1 };
+		point[3] = new int[2]{ img.Width - 1, img.Height - 1 };
 
-		int e_x = angle % 90 == 0 ? 0 : abs(center_x + cosT * (0 - center_x) + sinT * (0 - center_y));
-		int e_y = angle % 90 == 0 ? 0 : abs(center_y + cosT * (0 - center_y) - sinT * (0 - center_x));
+		double** newPoint = new double*[4];
+		for (int i = 0; i < 4; i++) {
+			newPoint[i] = new double[2]{ cos(angle) * point[i][0] + sin(angle) * point[i][1] , cos(angle) * point[i][1] - sin(angle) * point[i][0] };
+		}
 
-		arrayRGB hg;
-		hg.Height = img.Height + 2 * e_y;
-		hg.Width = img.Width + +2 * e_x;
-		hg.arr = new unsigned char**[hg.Height];
-		for (int i = 0; i < hg.Height; i++) {
-			hg.arr[i] = new unsigned char*[hg.Width];
-			for (int j = 0; j < hg.Width; j++) {
-				hg.arr[i][j] = new unsigned char[3]{ 0, 0, 0 };
+		double min_x = min(newPoint[0][0], min(newPoint[1][0], min(newPoint[2][0], newPoint[3][0])));
+		double max_x = max(newPoint[0][0], max(newPoint[1][0], max(newPoint[2][0], newPoint[3][0])));
+		double min_y = min(newPoint[0][1], min(newPoint[1][1], min(newPoint[2][1], newPoint[3][1])));
+		double max_y = max(newPoint[0][1], max(newPoint[1][1], max(newPoint[2][1], newPoint[3][1])));
+		return new int[2]{ int(max_x - min_x + 1), int(max_y - min_y + 1) };
+	}
+
+	private: arrayRGB rotation(arrayRGB img, int theta) {
+		theta %= 360;
+		theta = 360 - theta;
+		int* boundary = findboundary(img, theta);
+		int oldWidth = img.Width;
+		int oldHeight = img.Height;
+		int oldCenterX = (oldWidth - 1) / 2;
+		int oldCenterY = (oldHeight - 1) / 2;
+
+		int newWidth = boundary[0];
+		int newHeight = boundary[1];
+		int newCenterX = (newWidth - 1) / 2;
+		int newCenterY = (newHeight - 1) / 2;
+
+		arrayRGB newImg;
+		newImg.Height = newHeight;
+		newImg.Width = newWidth;
+		newImg.arr = new unsigned char**[newImg.Height];
+		for (int i = 0; i < newImg.Height; i++) {
+			newImg.arr[i] = new unsigned char*[newImg.Width];
+			for (int j = 0; j < newImg.Width; j++) {
+				newImg.arr[i][j] = new unsigned char[3]{ 0, 0, 0 };
 			}
 		}
 
-		int new_center_x = hg.Width / 2;
-		int new_center_y = hg.Height / 2;
+		theta = (360 - theta) % 360;
+		double angle = 3.14159265358979323846 * theta / 180.0;
 
-		for (int i = 0; i < img.Height; i++) {
-			for (int j = 0; j < img.Width; j++) {
-				int new_x = new_center_x + cosT * (j - center_x) + sinT * (i - center_y);
-				int new_y = new_center_y + cosT * (i - center_y) - sinT * (j - center_x);
-				if (new_x > -1 && new_y > -1 && new_x < hg.Width && new_y < hg.Height) {
-					for (int k = 0; k < 3; k++) {
-						hg.arr[new_y][new_x][k] = img.arr[i][j][k];
-					}
+		double sinT = sin(angle);
+		double cosT = cos(angle);
+
+		for (int i = 0; i < newHeight; i++) {
+			for (int j = 0; j < newWidth; j++) {
+				// 新圖尋找舊點 做雙線性差補
+				int refX = int(round(cosT * (j - newCenterX) + sinT * (i - newCenterY))) + oldCenterX;
+				int refY = int(round(-sinT * (j - newCenterX) + cosT * (i - newCenterY))) + oldCenterY;
+				if (refX >= 0 && refX < img.Width && refY >= 0 && refY < img.Height) {
+					newImg.arr[i][j] = img.arr[refY][refX];
 				}
-
 			}
 		}
-		return hg;
+
+		return newImg;
 	}
 
 	private: System::Void pictureBox_s_Click(System::Object^  sender, System::EventArgs^  e) {
